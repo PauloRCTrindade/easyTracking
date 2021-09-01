@@ -1,0 +1,4 @@
+ 
+abrir a pasta onde contém o api_america.pem no power shell e rodar comando 
+
+ssh -i "api_america.pem" ubuntu@ec2-52-67-112-158.sa-east-1.compute.amazonaws.com
