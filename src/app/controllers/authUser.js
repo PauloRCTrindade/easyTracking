@@ -16,9 +16,9 @@ function generateToken(params = {}) {
 const router = express.Router();
 
 router.post('/register', async(req, res) => {
-    const { email } = req.body;
+    const { cnpj } = req.body;
     try {
-        if (await User.findOne({ email })) {
+        if (await User.findOne({ cnpj })) {
             return res.status(400).send({ error: 'Usuário ja cadastrado!' })
         }
         const user = await User.create(req.body);

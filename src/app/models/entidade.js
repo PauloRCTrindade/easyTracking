@@ -1,33 +1,14 @@
 const mongoose = require('../../db/conexao');
-const GrupoEmpresa = require('../../app/models/grupo-empresa');
-const UnidadesSchema = new mongoose.Schema({
-    grupo: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "grupo-empresa",
-        required: true
-    },
-    cnpjUnidade: {
+const EntidadeSchema = new mongoose.Schema({
+
+    cnpj: {
         type: String,
         unique: true,
-        index: true,
         required: true,
     },
-    siglaUnidade: {
+    razaoSocial: {
         type: String,
         unique: true,
-        index: true,
-        required: true,
-    },
-    razaoSocialUnidade: {
-        type: String,
-        required: true,
-    },
-    ativo: {
-        type: Boolean,
-        required: true
-    },
-    contato: {
-        type: String,
         required: true,
     },
     logradouro: {
@@ -70,16 +51,13 @@ const UnidadesSchema = new mongoose.Schema({
         type: String,
         required: false
     },
-
     createdAt: {
         type: Date,
         default: Date.now
     }
 
-
 });
 
+const entidade = mongoose.model('entidade', EntidadeSchema);
 
-const unidadesEmpresa = mongoose.model('unidades-empresa', UnidadesSchema);
-
-module.exports = unidadesEmpresa;
+module.exports = entidade;

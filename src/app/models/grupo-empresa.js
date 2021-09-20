@@ -1,24 +1,31 @@
 const mongoose = require('../../db/conexao');
 const unidades = require('../../app/models/unidades-empresa');
 const GrupoSchema = new mongoose.Schema({
+
+    cnpj: {
+        type: String,
+        unique: true,
+        required: true,
+    },
     email: {
         type: String,
         unique: true,
         required: true,
     },
-    razaosocial: {
+    razaoSocial: {
         type: String,
-        unique: true,
         required: true,
     },
     ativo: {
         type: Boolean,
         required: true
     },
-    unidadesEmpresa: {
-        type: [unidades.unidadesEmpresa],
-        required: false,
-    },
+
+    // unidadesEmpresa: [{
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     ref: "unidades-empresa"
+    // }],
+
     createdAt: {
         type: Date,
         default: Date.now

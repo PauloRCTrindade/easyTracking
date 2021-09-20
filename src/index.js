@@ -9,3 +9,4 @@ app.use(express.urlencoded({ extended: false }));
 require('./app/controllers/index')(app);
 
 app.listen(36300);
+console.log("servidor ok")

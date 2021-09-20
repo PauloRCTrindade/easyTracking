@@ -1,22 +1,42 @@
 const express = require('express');
-const unidadesEmpresa = require('../models/unidades-empresa');
+const UnidadesEmpresa = require('../models/unidades-empresa');
+const Grupo = require('../models/grupo-empresa');
 
 const router = express.Router();
 
-router.post('/unidade/novo', async(req, res) => {
-    const sigla = req.body.siglaUnidade;
-    const cnpj = req.body.cnpj;
+router.get('/unidade', async(req, res) => {
     try {
-        if (await unidadesEmpresa.findOne({ cnpj, sigla })) {
-            return res.status(400).send({ error: 'Unidade ja cadastrada!' })
-        }
-        await unidadesEmpresa.create(req.body);
-        return res.status(200).send(ok);
-
-
-    } catch (err) {
-        return res.status(400).send({ error: 'Falha em registrar Unidade!' });
+        const unidades = await UnidadesEmpresa.find().populate(['grupo']);
+        return res.status(200).send(unidades);
+    } catch (error) {
+        return res.status(400).send({ error: 'Falha em listar Unidades!' });
     }
+})
+
+router.post('/unidade/novo', async(req, res) => {
+    const { siglaUnidade, cnpjUnidade } = req.body;
+    const raiz = cnpjUnidade.substr(0, 8);
+
+    try {
+        const grupoUni = await Grupo.findOne({ cnpj: new RegExp(raiz) });
+        try {
+            const unidade = await UnidadesEmpresa.findOne({ siglaUnidade, cnpjUnidade });
+            if (unidade !== null && unidade !== undefined) {
+                const updateUnidade = await UnidadesEmpresa.findByIdAndUpdate(unidade._id, req.body, { new: true });
+                return res.status(204).send(updateUnidade)
+            }
+            const newUnidade = await UnidadesEmpresa.create({...req.body, grupo: grupoUni._id });
+            return res.status(201).send(newUnidade);
+
+
+        } catch (error) {
+            return res.status(400).send(error);
+        };
+    } catch (error) {
+        return res.status(400).send(error);
+    };
+
+
 
 });
 module.exports = app => app.use('/app', router);
