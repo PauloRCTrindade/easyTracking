@@ -65,11 +65,11 @@ const DistribuicaoSchema = new mongoose.Schema({
         required: true,
         default: 'AG'
     },
-    tmsIntegerdo: {
+    tmsIntegrado: {
         type: Boolean,
         default: false
     },
-    appIntegerdo: {
+    appIntegrado: {
         type: Boolean,
         default: false,
     },
