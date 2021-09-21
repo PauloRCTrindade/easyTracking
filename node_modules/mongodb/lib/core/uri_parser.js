@@ -4,6 +4,7 @@ const qs = require('querystring');
 const dns = require('dns');
 const MongoParseError = require('./error').MongoParseError;
 const ReadPreference = require('./topologies/read_preference');
+const emitWarningOnce = require('../utils').emitWarningOnce;
 
 /**
  * The following regular expression validates a connection string and breaks the
@@ -51,7 +52,9 @@ function parseSrvConnectionString(uri, options, callback) {
   }
 
   result.domainLength = result.hostname.split('.').length;
-  if (result.pathname && result.pathname.match(',')) {
+
+  const hostname = uri.substring('mongodb+srv://'.length).split('/')[0];
+  if (hostname.match(',')) {
     return callback(new MongoParseError('Invalid URI, cannot contain multiple hostnames'));
   }
 
@@ -438,7 +441,7 @@ function parseQueryString(query, options) {
   // special cases for known deprecated options
   if (result.wtimeout && result.wtimeoutms) {
     delete result.wtimeout;
-    console.warn('Unsupported option `wtimeout` specified');
+    emitWarningOnce('Unsupported option `wtimeout` specified');
   }
 
   return Object.keys(result).length ? result : null;
