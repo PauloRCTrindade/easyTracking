@@ -7,9 +7,9 @@ const router = express.Router();
 router.get('/unidade', async(req, res) => {
     try {
         const unidades = await UnidadesEmpresa.find().populate(['grupo']);
-        return res.status(200).send(unidades);
+        return res.status(200).send({ sucess: true, unidades });
     } catch (error) {
-        return res.status(400).send({ error: 'Falha em listar Unidades!' });
+        return res.status(400).send({ sucess: false, error });
     }
 })
 
@@ -23,17 +23,17 @@ router.post('/unidade/novo', async(req, res) => {
             const unidade = await UnidadesEmpresa.findOne({ siglaUnidade, cnpjUnidade });
             if (unidade !== null && unidade !== undefined) {
                 const updateUnidade = await UnidadesEmpresa.findByIdAndUpdate(unidade._id, req.body, { new: true });
-                return res.status(204).send(updateUnidade)
+                return res.status(201).send({ sucess: true, updateUnidade })
             }
             const newUnidade = await UnidadesEmpresa.create({...req.body, grupo: grupoUni._id });
-            return res.status(201).send(newUnidade);
+            return res.status(201).send({ sucess: true, newUnidade });
 
 
         } catch (error) {
-            return res.status(400).send(error);
+            return res.status(500).send({ sucess: false, erro: error });
         };
     } catch (error) {
-        return res.status(400).send(error);
+        return res.status(400).send({ sucess: false, erro: error });
     };
 
 

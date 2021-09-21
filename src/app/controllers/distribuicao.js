@@ -28,9 +28,14 @@ router.get('/distribuicao/:motorista/:veiculo', async(req, res) => {
             path: 'docsDistribuicao',
             populate: [{ path: 'remetente' }, { path: 'destinatario' }]
         });
-        return res.status(200).send(romaneio)
+        if (romaneio._id != '') {
+            return res.status(200).send({ sucess: true, romaneio })
+        } else {
+            return res.status(500).send({ sucess: false, erro: 'Não existe Romaneio o motorista ou veículo informados!' })
+        }
+
     } catch (error) {
-        return res.status(400).send(error)
+        return res.status(400).send({ sucess: false, error })
     }
 });
 
@@ -40,9 +45,24 @@ router.get('/distribuicao/carga/:motorista/:veiculo/:status', async(req, res) =>
             path: 'docsDistribuicao',
             populate: [{ path: 'remetente' }, { path: 'destinatario' }]
         });
-        return res.status(200).send(romaneio)
+        if (romaneio._id != '') {
+            return res.status(200).send({ sucess: true, romaneio })
+        } else {
+            return res.status(500).send({ sucess: false, erro: 'Não existe Romaneio o motorista ou veículo informados!' })
+        }
+
     } catch (error) {
-        return res.status(400).send(error)
+        return res.status(400).send({ sucess: false, error })
+    }
+});
+
+router.put('/distribuicao/carga/:romaneioId/:status', async(req, res) => {
+    try {
+        const romaneio = await Romaneio.findByIdAndUpdate({ _id: req.params.romaneioId }, { appIntegrado: true, status: req.params.status }, { new: true });
+        await DocsDistribuicao.updateMany({ romaneio: req.params.romaneioId }, { appIntegrado: true, status: req.params.status });
+        return res.status(201).send({ sucess: true, romaneio });
+    } catch (error) {
+        return res.status(400).send({ sucess: false, romaneio });
     }
 });
 
@@ -52,7 +72,7 @@ router.get('/distribuicao/:romaneioId', async(req, res) => {
         const romaneio = await Romaneio.findById(req.params.romaneioId).populate(['docsDistribuicao', 'entidade']);
         return res.status(200).send(romaneio);
     } catch (err) {
-        return res.status(400).send({ error: 'Erro em listar Romaneios' })
+        return res.status(400).send({ error: 'Erro em listar Romaneios', err })
     }
 });
 

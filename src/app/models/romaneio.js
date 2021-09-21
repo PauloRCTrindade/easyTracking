@@ -45,11 +45,11 @@ const RomaneioSchema = new mongoose.Schema({
         default: 'AG'
     },
 
-    tmsIntegerdo: {
+    tmsIntegrado: {
         type: Boolean,
         default: false
     },
-    appIntegerdo: {
+    appIntegrado: {
         type: Boolean,
         default: false,
     },
