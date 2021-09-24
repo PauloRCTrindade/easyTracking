@@ -10,9 +10,9 @@ const router = express.Router();
 
 router.use(authMiddlewares);
 
-router.get('/distribuicao', async(req, res) => {
+router.get('/distribuicao/:cnpj', async(req, res) => {
     try {
-        const romaneio = await Romaneio.find().populate({
+        const romaneio = await Romaneio.find({ cnpj: req.params.cnpj }).populate({
             path: 'docsDistribuicao',
             populate: [{ path: 'remetente' }, { path: 'destinatario' }]
         });
@@ -46,6 +46,9 @@ router.get('/distribuicao/carga/:motorista/:veiculo/:status', async(req, res) =>
             populate: [{ path: 'remetente' }, { path: 'destinatario' }]
         });
         if (romaneio._id != '') {
+            //   await Romaneio.findByIdAndUpdate({ _id: romaneio._id }, { appIntegrado: true, status: 'AN' }, { new: true });
+            //   await DocsDistribuicao.updateMany({ romaneio: romaneio._id }, { appIntegrado: true, status: 'AN' }, { new: true });
+
             return res.status(200).send({ sucess: true, romaneio })
         } else {
             return res.status(500).send({ sucess: false, erro: 'Não existe Romaneio o motorista ou veículo informados!' })
@@ -59,10 +62,19 @@ router.get('/distribuicao/carga/:motorista/:veiculo/:status', async(req, res) =>
 router.put('/distribuicao/carga/:romaneioId/:status', async(req, res) => {
     try {
         const romaneio = await Romaneio.findByIdAndUpdate({ _id: req.params.romaneioId }, { appIntegrado: true, status: req.params.status }, { new: true });
-        await DocsDistribuicao.updateMany({ romaneio: req.params.romaneioId }, { appIntegrado: true, status: req.params.status });
+        await DocsDistribuicao.updateMany({ romaneio: req.params.romaneioId }, { appIntegrado: true, status: req.params.status }, { new: true });
         return res.status(201).send({ sucess: true, romaneio });
     } catch (error) {
         return res.status(400).send({ sucess: false, romaneio });
+    }
+});
+
+router.put('/distribuicao/entrega/:documentoId', async(req, res) => {
+    try {
+        const documento = await DocsDistribuicao.findByIdAndUpdate({ romaneio: req.params.documentoId }, {...req.body }, { new: true });
+        return res.status(201).send({ sucess: true, documento });
+    } catch (error) {
+        return res.status(400).send({ sucess: false, documento });
     }
 });
 
@@ -100,13 +112,13 @@ router.post('/distribuicao/novo', async(req, res) => {
         const arr = docsDistribuicao;
         arr.forEach(async docDistribuicao => {
 
-            const rem = await Entidade.findOneAndUpdate({ cnpj: docDistribuicao.remetente.cnpj }, docDistribuicao.remetente, { upsert: true }, function(err, doc) {
-                if (err) return res.send(500, { error: err });
+            const rem = await Entidade.findOneAndUpdate({ cnpj: docDistribuicao.remetente.cnpj }, docDistribuicao.remetente, { new: true, upsert: true }, function(err, doc) {
+                if (err) return res.status(500).send({ sucess: false, error: err });
 
             });
 
-            const des = await Entidade.findOneAndUpdate({ cnpj: docDistribuicao.destinatario.cnpj }, docDistribuicao.destinatario, { upsert: true }, function(err, doc) {
-                if (err) return res.send(500, { error: err });
+            const des = await Entidade.findOneAndUpdate({ cnpj: docDistribuicao.destinatario.cnpj }, docDistribuicao.destinatario, { new: true, upsert: true }, function(err, doc) {
+                if (err) return res.send({ sucess: false, error: err });
 
             });
 
@@ -120,11 +132,11 @@ router.post('/distribuicao/novo', async(req, res) => {
         await newRomaneio.save();
 
 
-        return res.status(200).send(newRomaneio);
+        return res.status(200).send({ sucess: true, romaneio: newRomaneio });
 
     } catch (error) {
         // console.log(err);
-        return res.status(400).send(error);
+        return res.status(400).send({ sucess: false, error });
     }
 
 });

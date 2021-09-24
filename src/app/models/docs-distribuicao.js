@@ -24,7 +24,11 @@ const DistribuicaoSchema = new mongoose.Schema({
         index: true,
         required: true,
     },
+    chave: {
+        type: String,
+        index: true,
 
+    },
     remetente: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "entidade"
