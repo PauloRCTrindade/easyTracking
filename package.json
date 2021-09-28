@@ -1,26 +1,33 @@
 {
-  "name": "easyTracking",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "bcrypt": "^5.0.1",
-    "bcryptjs": "^2.4.3",
-    "express": "^4.17.1",
-    "fs": "^0.0.1-security",
-    "jsonwebtoken": "^8.5.1",
-    "mongoose": "^5.13.9",
-    "nodemailer": "^6.5.0",
-    "nodemailer-express-handlebars": "^4.0.0",
-    "path": "^0.12.7"
-  },
-  "devDependencies": {
-    "nodemon": "^2.0.12"
-  }
+    "name": "easyTracking",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "dev": "nodemon src/index.js",
+        "start": "node src/index.js",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "aws-sdk": "^2.996.0",
+        "bcrypt": "^5.0.1",
+        "bcryptjs": "^2.4.3",
+        "dotenv": "^10.0.0",
+        "express": "^4.17.1",
+        "fs": "^0.0.1-security",
+        "jsonwebtoken": "^8.5.1",
+        "mongoose": "^5.13.9",
+        "morgan": "^1.10.0",
+        "multer": "^1.4.3",
+        "multer-s3": "^2.9.0",
+        "nodemailer": "^6.5.0",
+        "nodemailer-express-handlebars": "^4.0.0",
+        "path": "^0.12.7"
+    },
+    "devDependencies": {
+        "nodemon": "^2.0.12"
+    }
 }

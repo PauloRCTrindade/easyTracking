@@ -78,10 +78,16 @@ const DistribuicaoSchema = new mongoose.Schema({
         default: false,
     },
 
+    dadosRecebedor: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "dados-recebedor"
+    },
+
 
     createdAt: {
         type: Date,
-        default: Date.now
+        default: Date.now,
+        selected: false,
     }
 
 });

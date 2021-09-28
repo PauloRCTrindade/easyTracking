@@ -1,5 +1,4 @@
 const mongoose = require('../../db/conexao');
-const unidades = require('../../app/models/unidades-empresa');
 const GrupoSchema = new mongoose.Schema({
 
     cnpj: {
@@ -20,11 +19,6 @@ const GrupoSchema = new mongoose.Schema({
         type: Boolean,
         required: true
     },
-
-    // unidadesEmpresa: [{
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: "unidades-empresa"
-    // }],
 
     createdAt: {
         type: Date,
