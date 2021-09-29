@@ -182,7 +182,6 @@ router.post('/distribuicao/recebedor', async(req, res) => {
 
 router.post('/distribuicao/imagens/:idRecebedor', multer(multerConfig).single('file'), async(req, res) => {
     try {
-
         const { originalname: name, size, key, location: url = '' } = req.file;
         const image = await Imagem.create({
             name,
