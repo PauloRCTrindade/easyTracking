@@ -156,11 +156,10 @@ router.post('/distribuicao/novo', async(req, res) => {
 router.post('/distribuicao/recebedor', async(req, res) => {
     try {
         const { documento, dataHotaChegada, dataHotaSaida, status, recebedor } = req.body;
-        const newRecebedor = await Recebedor.findOneAndUpdate({
+        const newRecebedor = await Recebedor.findOneAndUpdate({ documento }, {
             doc: recebedor.doc,
             nome: recebedor.nome,
-            codOcorrencia: recebedor.codOcorrencia
-        }, {
+            codOcorrencia: recebedor.codOcorrencia,
             descOcorrencia: recebedor.descOcorrencia,
             documento,
             dataHotaChegada,
@@ -168,7 +167,7 @@ router.post('/distribuicao/recebedor', async(req, res) => {
             status
         }, { new: true, upsert: true });
         await DocsDistribuicao.updateOne({ _id: documento }, {
-            $push: { dadosRecebedor: newRecebedor._id },
+            dadosRecebedor: newRecebedor._id,
             dataHotaChegada: dataHotaChegada,
             dataHotaSaida: dataHotaSaida,
             status: status
