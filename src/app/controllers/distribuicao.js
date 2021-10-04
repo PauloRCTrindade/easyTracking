@@ -22,10 +22,10 @@ router.get('/distribuicao/:cnpj', async(req, res) => {
         const romaneio = await Romaneio.find({ cnpj: req.params.cnpj }).populate({
             path: 'docsDistribuicao',
             populate: [{ path: 'remetente' }, { path: 'destinatario' }, { path: 'dadosRecebedor', populate: [{ path: 'imagens' }] }]
-        });
-        return res.status(200).send(romaneio);
+        }).where('status').in(['AG', 'EN']);
+        return res.status(200).send({ sucess: true, romaneios: romaneio });
     } catch (error) {
-        return res.status(400).send(error)
+        return res.status(400).send({ sucess: true, erro: error })
     }
 });
 
@@ -34,11 +34,11 @@ router.get('/distribuicao/:cnpj/:status', async(req, res) => {
     try {
         const romaneio = await Romaneio.find({ cnpj: req.params.cnpj, status: req.params.status }).populate({
             path: 'docsDistribuicao',
-            populate: [{ path: 'remetente' }, { path: 'destinatario' }]
+            populate: [{ path: 'remetente' }, { path: 'destinatario' }, { path: 'dadosRecebedor', populate: [{ path: 'imagens' }] }]
         });
-        return res.status(200).send(romaneio);
+        return res.status(200).send({ sucess: true, romaneio: romaneio });
     } catch (error) {
-        return res.status(400).send(error)
+        return res.status(400).send({ sucess: true, erro: error })
     }
 });
 
@@ -155,7 +155,7 @@ router.post('/distribuicao/novo', async(req, res) => {
 
 router.post('/distribuicao/recebedor', async(req, res) => {
     try {
-        const { documento, dataHotaChegada, dataHotaSaida, status, recebedor } = req.body;
+        const { documento, dataHoraChegada, dataHoraSaida, status, recebedor } = req.body;
         const newRecebedor = await Recebedor.findOneAndUpdate({ documento }, {
             doc: recebedor.doc,
             nome: recebedor.nome,
@@ -168,15 +168,15 @@ router.post('/distribuicao/recebedor', async(req, res) => {
         }, { new: true, upsert: true });
         await DocsDistribuicao.updateOne({ _id: documento }, {
             dadosRecebedor: newRecebedor._id,
-            dataHotaChegada: dataHotaChegada,
-            dataHotaSaida: dataHotaSaida,
+            dataHoraChegada: dataHoraChegada,
+            dataHoraSaida: dataHoraSaida,
             status: status
         });
 
         return res.status(201).send({ sucess: true, recebedor: newRecebedor });
 
     } catch (error) {
-        return res.status(400).send({ sucess: false, error });
+        return res.status(400).send({ sucess: false, erro: error });
     }
 });
 

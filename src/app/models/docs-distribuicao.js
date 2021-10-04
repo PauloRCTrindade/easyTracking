@@ -55,11 +55,11 @@ const DistribuicaoSchema = new mongoose.Schema({
         default: Date.now,
         required: true
     },
-    dataHotaChegada: {
+    dataHoraChegada: {
         type: Date,
         required: false
     },
-    dataHotaSaida: {
+    dataHoraSaida: {
         type: Date,
         required: false
     },
