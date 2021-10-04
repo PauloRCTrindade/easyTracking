@@ -17,7 +17,7 @@ router.get('/distribuicao/:cnpj', async(req, res) => {
         const romaneio = await Romaneio.find({ cnpj: req.params.cnpj }).populate({
             path: 'docsDistribuicao',
             populate: [{ path: 'remetente' }, { path: 'destinatario' }, { path: 'dadosRecebedor', populate: [{ path: 'imagens' }] }]
-        }).where('status').in(['AG', 'EN']);
+        }).where('status').in(['AG', 'EN', 'EX']);
         return res.status(200).send({ sucess: true, romaneios: romaneio });
     } catch (error) {
         return res.status(400).send({ sucess: true, erro: error })
@@ -31,7 +31,7 @@ router.get('/distribuicao/:cnpj/:status', async(req, res) => {
             path: 'docsDistribuicao',
             populate: [{ path: 'remetente' }, { path: 'destinatario' }, { path: 'dadosRecebedor', populate: [{ path: 'imagens' }] }]
         });
-        return res.status(200).send({ sucess: true, romaneio: romaneio });
+        return res.status(200).send({ sucess: true, romaneios: romaneio });
     } catch (error) {
         return res.status(400).send({ sucess: true, erro: error })
     }
