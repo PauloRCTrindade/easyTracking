@@ -7,12 +7,7 @@ const Imagem = require('../models/imagens');
 const Recebedor = require('../models/dados-recebedor');
 const multer = require('multer');
 const multerConfig = require('../../config/multer');
-
-
 const authMiddlewares = require('../middlewares/auth');
-
-
-
 const router = express.Router();
 
 router.use(authMiddlewares);
@@ -67,9 +62,6 @@ router.get('/distribuicao/carga/:motorista/:veiculo/:status', async(req, res) =>
             populate: [{ path: 'remetente' }, { path: 'destinatario' }]
         });
         if (romaneio._id != '') {
-            //   await Romaneio.findByIdAndUpdate({ _id: romaneio._id }, { appIntegrado: true, status: 'AN' }, { new: true });
-            //   await DocsDistribuicao.updateMany({ romaneio: romaneio._id }, { appIntegrado: true, status: 'AN' }, { new: true });
-
             return res.status(200).send({ sucess: true, romaneio })
         } else {
             return res.status(500).send({ sucess: false, erro: 'Não existe Romaneio o motorista ou veículo informados!' })
