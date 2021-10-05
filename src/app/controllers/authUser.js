@@ -29,8 +29,8 @@ router.post('/register', async(req, res) => {
             user,
             token: generateToken({ id: user.id })
         });
-    } catch (err) {
-        return res.status(400).send({ error: 'Falha em registrar usuário!' });
+    } catch (error) {
+        return res.status(400).send(error);
     }
 
 });
