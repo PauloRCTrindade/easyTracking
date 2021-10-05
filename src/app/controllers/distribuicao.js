@@ -7,12 +7,7 @@ const Imagem = require('../models/imagens');
 const Recebedor = require('../models/dados-recebedor');
 const multer = require('multer');
 const multerConfig = require('../../config/multer');
-
-
 const authMiddlewares = require('../middlewares/auth');
-
-
-
 const router = express.Router();
 
 router.use(authMiddlewares);
@@ -22,10 +17,10 @@ router.get('/distribuicao/:cnpj', async(req, res) => {
         const romaneio = await Romaneio.find({ cnpj: req.params.cnpj }).populate({
             path: 'docsDistribuicao',
             populate: [{ path: 'remetente' }, { path: 'destinatario' }, { path: 'dadosRecebedor', populate: [{ path: 'imagens' }] }]
-        });
-        return res.status(200).send(romaneio);
+        }).where('status').in(['AG', 'EN', 'EX']);
+        return res.status(200).send({ sucess: true, romaneios: romaneio });
     } catch (error) {
-        return res.status(400).send(error)
+        return res.status(400).send({ sucess: true, erro: error })
     }
 });
 
@@ -34,11 +29,11 @@ router.get('/distribuicao/:cnpj/:status', async(req, res) => {
     try {
         const romaneio = await Romaneio.find({ cnpj: req.params.cnpj, status: req.params.status }).populate({
             path: 'docsDistribuicao',
-            populate: [{ path: 'remetente' }, { path: 'destinatario' }]
+            populate: [{ path: 'remetente' }, { path: 'destinatario' }, { path: 'dadosRecebedor', populate: [{ path: 'imagens' }] }]
         });
-        return res.status(200).send(romaneio);
+        return res.status(200).send({ sucess: true, romaneios: romaneio });
     } catch (error) {
-        return res.status(400).send(error)
+        return res.status(400).send({ sucess: true, erro: error })
     }
 });
 
@@ -67,9 +62,6 @@ router.get('/distribuicao/carga/:motorista/:veiculo/:status', async(req, res) =>
             populate: [{ path: 'remetente' }, { path: 'destinatario' }]
         });
         if (romaneio._id != '') {
-            //   await Romaneio.findByIdAndUpdate({ _id: romaneio._id }, { appIntegrado: true, status: 'AN' }, { new: true });
-            //   await DocsDistribuicao.updateMany({ romaneio: romaneio._id }, { appIntegrado: true, status: 'AN' }, { new: true });
-
             return res.status(200).send({ sucess: true, romaneio })
         } else {
             return res.status(500).send({ sucess: false, erro: 'Não existe Romaneio o motorista ou veículo informados!' })
@@ -89,6 +81,17 @@ router.put('/distribuicao/carga/:romaneioId/:status', async(req, res) => {
         return res.status(400).send({ sucess: false, erro: error });
     }
 });
+
+router.put('/distribuicao/baixa/:cnpj/:unidade/:romaneio', async(req, res) => {
+    try {
+        const romaneio = await Romaneio.findOneAndUpdate({ cnpj: req.params.cnpj, unidade: req.params.unidade, romaneio: req.params.romaneio }, { status: 'BX' }, { new: true });
+        await DocsDistribuicao.updateMany({ romaneio: romaneio._id }, { status: 'BX', tmsIntegrado: true }, { new: true });
+        return res.status(201).send({ sucess: true, romaneio });
+    } catch (error) {
+        return res.status(400).send({ sucess: false, erro: error });
+    }
+});
+
 
 
 router.get('/distribuicao/:romaneioId', async(req, res) => {
@@ -155,35 +158,35 @@ router.post('/distribuicao/novo', async(req, res) => {
 
 router.post('/distribuicao/recebedor', async(req, res) => {
     try {
-        const { documento, dataHotaChegada, dataHotaSaida, status, recebedor } = req.body;
-        const newRecebedor = await Recebedor.findOneAndUpdate({
+        const { documento, dataHoraChegada, dataHoraSaida, status, recebedor } = req.body;
+        const newRecebedor = await Recebedor.findOneAndUpdate({ documento: documento }, {
             doc: recebedor.doc,
             nome: recebedor.nome,
-            codOcorrencia: recebedor.codOcorrencia
-        }, {
+            codOcorrencia: recebedor.codOcorrencia,
             descOcorrencia: recebedor.descOcorrencia,
             documento,
-            dataHotaChegada,
-            dataHotaSaida,
+            dataHoraChegada,
+            dataHoraSaida,
             status
         }, { new: true, upsert: true });
         await DocsDistribuicao.updateOne({ _id: documento }, {
-            $push: { dadosRecebedor: newRecebedor._id },
-            dataHotaChegada: dataHotaChegada,
-            dataHotaSaida: dataHotaSaida,
+            dadosRecebedor: newRecebedor._id,
+            dataHoraChegada: dataHoraChegada,
+            dataHoraSaida: dataHoraSaida,
             status: status
         });
 
         return res.status(201).send({ sucess: true, recebedor: newRecebedor });
 
     } catch (error) {
-        return res.status(400).send({ sucess: false, error });
+        return res.status(400).send({ sucess: false, erro: error });
     }
 });
 
 router.post('/distribuicao/imagens/:idRecebedor', multer(multerConfig).single('file'), async(req, res) => {
     try {
         const { originalname: name, size, key, location: url = '' } = req.file;
+        console.log({ name, size, key });
         const image = await Imagem.create({
             name,
             size,
@@ -195,10 +198,12 @@ router.post('/distribuicao/imagens/:idRecebedor', multer(multerConfig).single('f
 
         console.log(image._id);
         await Recebedor.findOneAndUpdate({ _id: req.params.idRecebedor }, { $push: { imagens: image._id } });
-        return res.json(image);
+        return res.status(201).json(image);
 
     } catch (error) {
+        console.log(error)
         return res.status(400).send({ sucess: false, erro: error });
+
     }
 });
 
