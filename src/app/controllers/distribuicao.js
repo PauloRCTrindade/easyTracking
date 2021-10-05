@@ -82,6 +82,17 @@ router.put('/distribuicao/carga/:romaneioId/:status', async(req, res) => {
     }
 });
 
+router.put('/distribuicao/baixa/:cnpj/:unidade/:romaneio', async(req, res) => {
+    try {
+        const romaneio = await Romaneio.findOneAndUpdate({ cnpj: req.params.cnpj, unidade: req.params.unidade, romaneio: req.params.romaneio }, { status: 'BX' }, { new: true });
+        await DocsDistribuicao.updateMany({ romaneio: romaneio._id }, { status: 'BX', tmsIntegrado: true }, { new: true });
+        return res.status(201).send({ sucess: true, romaneio });
+    } catch (error) {
+        return res.status(400).send({ sucess: false, erro: error });
+    }
+});
+
+
 
 router.get('/distribuicao/:romaneioId', async(req, res) => {
     try {
@@ -148,14 +159,14 @@ router.post('/distribuicao/novo', async(req, res) => {
 router.post('/distribuicao/recebedor', async(req, res) => {
     try {
         const { documento, dataHoraChegada, dataHoraSaida, status, recebedor } = req.body;
-        const newRecebedor = await Recebedor.findOneAndUpdate({ documento }, {
+        const newRecebedor = await Recebedor.findOneAndUpdate({ documento: documento }, {
             doc: recebedor.doc,
             nome: recebedor.nome,
             codOcorrencia: recebedor.codOcorrencia,
             descOcorrencia: recebedor.descOcorrencia,
             documento,
-            dataHotaChegada,
-            dataHotaSaida,
+            dataHoraChegada,
+            dataHoraSaida,
             status
         }, { new: true, upsert: true });
         await DocsDistribuicao.updateOne({ _id: documento }, {
@@ -175,6 +186,7 @@ router.post('/distribuicao/recebedor', async(req, res) => {
 router.post('/distribuicao/imagens/:idRecebedor', multer(multerConfig).single('file'), async(req, res) => {
     try {
         const { originalname: name, size, key, location: url = '' } = req.file;
+        console.log({ name, size, key });
         const image = await Imagem.create({
             name,
             size,
@@ -186,10 +198,12 @@ router.post('/distribuicao/imagens/:idRecebedor', multer(multerConfig).single('f
 
         console.log(image._id);
         await Recebedor.findOneAndUpdate({ _id: req.params.idRecebedor }, { $push: { imagens: image._id } });
-        return res.json(image);
+        return res.status(201).json(image);
 
     } catch (error) {
+        console.log(error)
         return res.status(400).send({ sucess: false, erro: error });
+
     }
 });
 
